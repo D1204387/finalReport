@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票價格搜尋</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<h1>台灣10大龍頭企業</h1>
+<ul>
+    <li>台積電</li>
+    <li>鴻海</li>
+    <li>聯發科</li>
+    <li>中華電信</li>
+    <li>台灣大</li>
+    <li>台塑</li>
+    <li>中鋼</li>
+    <li>大立光</li>
+    <li>友達</li>
+    <li>南亞科</li>
+</ul>
+<div id="app">
+    <h2>過去10年的股票價格月平均收盤價</h2>
+    <p>請選擇起始月份、結束月份及股票名稱(可多選)，按下搜尋的按鈕</p>
+    <form @submit.prevent="searchStockPrices">
+        <div>
+            <label for="start_month">起始月份:</label>
+            <input type="month" id="start_month" v-model="startMonth" min="2014-01" max="2023-12" required>
+        </div>
+        <div>
+            <label for="end_month">結束月份:</label>
+            <input type="month" id="end_month" v-model="endMonth" min="2014-01" max="2023-12" required>
+        </div>
+        <div>
+            <label for="stock_names">股票名稱:</label>
+            <select id="stock_names" v-model="selectedStocks" multiple required>
+                <option value="台積電">台積電</option>
+                <option value="鴻海">鴻海</option>
+                <option value="聯發科">聯發科</option>
+                <option value="中華電信">中華電信</option>
+                <option value="台灣大">台灣大</option>
+                <option value="台塑">台塑</option>
+                <option value="中鋼">中鋼</option>
+                <option value="大立光">大立光</option>
+                <option value="友達">友達</option>
+                <option value="南亞科">南亞科</option>
+            </select>
+        </div>
+        <button type="submit">搜尋</button>
+    </form>
+
+    <canvas id="stockChart"></canvas>
+
+    <div v-if="searchResults.length > 0">
+        <h3>搜尋結果</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>年/月</th>
+                <th v-for="stock in selectedStocks" :key="stock">{{ stock }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(row, index) in formattedResults" :key="index">
+                <td>{{ row.date }}</td>
+                <td v-for="(price, stockIndex) in row.prices" :key="stockIndex">{{ price }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+  const { createApp } = Vue;
+
+  createApp({
+    data() {
+      return {
+        startMonth: '',
+        endMonth: '',
+        selectedStocks: [],
+        searchResults: [],
+        stockChart: null,
+      };
+    },
+    computed: {
+      formattedResults() {
+        const formatted = [];
+        const dates = new Set();
+        this.searchResults.forEach(result => {
+          dates.add(result.date);
+        });
+        dates.forEach(date => {
+          const row = { date, prices: Array(this.selectedStocks.length).fill(null) };
+          this.searchResults.forEach(result => {
+            if (result.date === date) {
+              const stockIndex = this.selectedStocks.indexOf(result.stock_name);
+              if (stockIndex !== -1) {
+                row.prices[stockIndex] = result.avg_close_price;
+              }
+            }
+          });
+          formatted.push(row);
+        });
+        return formatted;
+      }
+    },
+    methods: {
+      async searchStockPrices() {
+        try {
+          const startMonth = `${this.startMonth}-01`;
+          const endMonth = `${this.endMonth}-01`;
+          const selectedStocks = this.selectedStocks;
+
+          const response = await fetch('/api/search', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ start_month: startMonth, end_month: endMonth, stock_names: selectedStocks })
+          });
+          const data = await response.json();
+          this.searchResults = data;
+          this.renderChart();
+        } catch (error) {
+          console.error('Error fetching stock prices:', error);
+        }
+      },
+      renderChart() {
+        const labels = [...new Set(this.searchResults.map(result => result.date))];
+        const datasets = this.selectedStocks.map(stock => ({
+          label: stock,
+          data: labels.map(date => {
+            const result = this.searchResults.find(result => result.date === date && result.stock_name === stock);
+            return result ? result.avg_close_price : null;
+          }),
+          borderColor: this.getRandomColor(),
+          fill: false,
+        }));
+        if (this.stockChart) {
+          this.stockChart.destroy();
+        }
+        const ctx = document.getElementById('stockChart').getContext('2d');
+        this.stockChart = new Chart(ctx, {
+          type: 'line',
+          data: { labels, datasets },
+          options: { responsive: true }
+        });
+      },
+      getRandomColor() {
+        const r = Math.floor(Math.random() * 255);
+        const g = Math.floor(Math.random() * 255);
+        const b = Math.floor(Math.random() * 255);
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+    }
+  }).mount('#app');
+</script>
+</body>
+</html>

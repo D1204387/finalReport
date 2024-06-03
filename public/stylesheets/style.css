@@ -1,0 +1,119 @@
+/* stylesheets/style.css */
+
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f0f0;
+  color: #333;
+  padding: 20px;
+  margin: 0;
+}
+
+#app {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 20px;
+  background: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  color: #0275d8;
+}
+ul {
+  list-style: none;
+  padding: 0;
+  max-width: 600px;
+  margin: 20px auto;
+}
+li {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  margin-top: 5px;
+  padding: 10px 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: background-color 0.3s;
+}
+li:hover {
+  background-color: #f9f9f9;
+}
+
+form {
+  margin: 20px 0;
+}
+
+form div {
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+input[type="date"],
+input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background: #218838;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background: #007bff;
+  color: white;
+}
+
+tbody tr:nth-child(odd) {
+  background: #f9f9f9;
+}
+
+small {
+  display: block;
+  margin-top: 5px;
+  color: #666;
+}
+
+canvas {
+  max-width: 1000px;
+  margin: 20px auto;
+}
+/* 自定義的 CSS 來控制圖表的尺寸 */
+#stockChart {
+  width: 100%;
+  max-width: 900px; /* 最大寬度，可根據需要調整 */
+  height: 400px; /* 高度，可根據需要調整 */
+  margin: 20px auto;
+}
+
